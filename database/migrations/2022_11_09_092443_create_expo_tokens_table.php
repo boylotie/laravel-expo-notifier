@@ -10,11 +10,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create(config('expo-notifications.database.tokens_table_name', 'expo_tokens'), function (Blueprint $table) {
+        $driver = Schema::getConnection()->getDriverName();
+
+        Schema::create(config('expo-notifications.database.tokens_table_name', 'expo_tokens'), function (Blueprint $table) use ($driver) {
             $table->id();
 
             $table->morphs('owner');
-            $table->string('value');
+            $value = $table->string('value');
+            if ($driver === 'mysql') {
+                $value->charset('ascii')->collation('ascii_bin');
+            }
 
             $table->timestamps();
         });
